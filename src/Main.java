@@ -1,7 +1,4 @@
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.Size;
+import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -10,6 +7,16 @@ import java.io.File;
 
 public class Main {
     public static void main(String[] args) {
+        // Valores para segmentar el color azul en el espacio HSV
+        double hueMin = 90;     // Rango mínimo de tono para el azul
+        double hueMax = 130;    // Rango máximo de tono para el azul
+
+        double saturationMin = 100; // Mínima saturación (puede ajustarse)
+        double saturationMax = 255; // Máxima saturación (puede ajustarse)
+
+        double valueMin = 50;   // Valor mínimo (brillo) (puede ajustarse)
+        double valueMax = 255;  // Valor máximo (brillo) (puede ajustarse)
+
         // Carga la biblioteca nativa de OpenCV
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
@@ -34,30 +41,49 @@ public class Main {
         // Recorrer los archivos y cargar las imágenes usando OpenCV
         for (File file : files) {
             if (file.isFile() && count < 5) { // Limitar a las primeras 5 imágenes
-                // Cargar la imagen utilizando OpenCV
-                Mat image = Imgcodecs.imread(file.getAbsolutePath());
+                try {
+                    // Cargar la imagen utilizando OpenCV
+                    Mat image = Imgcodecs.imread(file.getAbsolutePath());
+                    // Verificar si la imagen se cargó correctamente
+                    if (!image.empty()) {
+                        // Escalar la imagen a 640x480
+                        Imgproc.resize(image, image, new Size(640, 480));
 
-                // Verificar si la imagen se cargó correctamente
-                if (!image.empty()) {
-                    // Escalar la imagen a 640x480
-                    Imgproc.resize(image, image, new Size(640, 480));
+                        // Convertir la imagen a espacio de color HSV
+                        Mat hsvImage = new Mat();
+                        Imgproc.cvtColor(image, hsvImage, Imgproc.COLOR_BGR2HSV);
 
-                    MatOfByte buffer = new MatOfByte();
-                    Imgcodecs.imencode(".jpg", image, buffer); // Convertir Mat a byte buffer
+                        // Definir rangos de colores en HSV para la segmentación
+                        Scalar lowerBound = new Scalar(hueMin, saturationMin, valueMin);
+                        Scalar upperBound = new Scalar(hueMax, saturationMax, valueMax);
 
-                    ImageIcon icon = new ImageIcon(buffer.toArray()); // Convertir buffer a ImageIcon
-                    JLabel label = new JLabel(icon);
+                        // Crear una máscara binaria utilizando inRange
+                        Mat mask = new Mat();
+                        Core.inRange(hsvImage, lowerBound, upperBound, mask);
 
-                    // Crear una nueva ventana para cada imagen
-                    JFrame frame = new JFrame("Imagen: " + file.getName());
-                    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                    frame.add(label);
-                    frame.pack();
-                    frame.setVisible(true);
+                        // Aplicar la máscara a la imagen original
+                        Mat segmented = new Mat();
+                        Core.bitwise_and(image, image, segmented, mask);
 
-                    count++; // Incrementar el contador
-                } else {
-                    System.out.println("No se pudo cargar la imagen: " + file.getName());
+                        // Mostrar la imagen segmentada en una nueva ventana
+                        MatOfByte segmentedBuffer = new MatOfByte();
+                        Imgcodecs.imencode(".jpg", segmented, segmentedBuffer);
+                        ImageIcon segmentedIcon = new ImageIcon(segmentedBuffer.toArray());
+                        JLabel segmentedLabel = new JLabel(segmentedIcon);
+
+                        JFrame segmentedFrame = new JFrame("Segmentación de Piezas Azules: " + file.getName());
+                        segmentedFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        segmentedFrame.add(segmentedLabel);
+                        segmentedFrame.pack();
+                        segmentedFrame.setVisible(true);
+
+                        count++; // Incrementar el contador
+                    } else {
+                        System.out.println("No se pudo cargar la imagen: " + file.getName());
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error al cargar la imagen: " + file.getName());
+                    e.printStackTrace();
                 }
             }
         }
