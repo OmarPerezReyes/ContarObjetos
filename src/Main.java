@@ -50,8 +50,45 @@ public class Main {
             }
         }
     }
+    void processSingleImage(Mat image) {
+        try {
+            if (!image.empty()) {
+                Imgproc.resize(image, image, new Size(640, 480));
+                Mat hsvImage = new Mat();
+                Imgproc.cvtColor(image, hsvImage, Imgproc.COLOR_BGR2HSV);
 
-    private static void processSingleImage(File file) {
+                Mat combinedMask = createCombinedMask(hsvImage);
+                List<MatOfPoint> contours = findContours(combinedMask);
+                List<MatOfPoint> blueContours = new ArrayList<>();
+                List<MatOfPoint> cyanContours = new ArrayList<>();
+                List<MatOfPoint> orangeContours = new ArrayList<>();
+                List<MatOfPoint> redContours = new ArrayList<>();
+                List<MatOfPoint> greenContours = new ArrayList<>();
+                List<MatOfPoint> yellowContours = new ArrayList<>();
+
+                for (MatOfPoint contour : contours) {
+                    double contourArea = Imgproc.contourArea(contour);
+
+                    if (contourArea >= 100) {
+                        classifyContours(contour, blueContours, cyanContours, orangeContours, redContours,
+                                greenContours, yellowContours, hsvImage);
+                    }
+                }
+
+                drawContoursAndText(image, blueContours, cyanContours, orangeContours, redContours,
+                        greenContours, yellowContours, image.toString());
+            } else {
+                System.out.println("No se pudo cargar la imagen: " + image.toString());
+            }
+        } catch (Exception e) {
+            System.out.println("Error al cargar la imagen: " + image.toString());
+            e.printStackTrace();
+        }
+    }
+
+
+
+        private static void processSingleImage(File file) {
         try {
             Mat image = Imgcodecs.imread(file.getAbsolutePath());
 

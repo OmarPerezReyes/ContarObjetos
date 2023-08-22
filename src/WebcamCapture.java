@@ -16,6 +16,7 @@ public class WebcamCapture {
         }
 
         Mat frame = new Mat();
+        Main mainProcessor = new Main();
 
         while (true) {
             if (capture.read(frame)) {
@@ -24,6 +25,9 @@ public class WebcamCapture {
 
                 // Muestra el frame en una ventana
                 HighGui.imshow("Webcam", frame);
+                // Perform image processing on the frame
+                mainProcessor.processSingleImage(frame);
+
 
                 if (HighGui.waitKey(1) == 27) { // Presiona la tecla Esc para salir
                     break;
