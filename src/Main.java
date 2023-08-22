@@ -163,20 +163,7 @@ public class Main {
             double saturationValue = contourHsvMean.val[1];
             double value = contourHsvMean.val[2];
 
-            if (hueValue >= blueHueMin && hueValue <= blueHueMax
-                    && saturationValue >= saturationMin && saturationValue <= saturationMax
-                    && value >= valueMin && value <= valueMax) {
-                blueContours.add(contour);
-            } else if (hueValue >= cyanHueMin && hueValue <= cyanHueMax
-                    && saturationValue >= saturationMin && saturationValue <= saturationMax
-                    && value >= valueMin && value <= valueMax) {
-                cyanContours.add(contour);
-            } else if (hueValue >= orangeHueMin && hueValue <= orangeHueMax
-                    && saturationValue >= saturationMin && saturationValue <= saturationMax
-                    && value >= valueMin && value <= valueMax) {
-                orangeContours.add(contour);
-            } else if ((hueValue >= redHueMin && hueValue <= 180
-                    || hueValue >= 0 && hueValue <= redHueMax)
+            if ((hueValue >= redHueMin && hueValue <= redHueMax)
                     && saturationValue >= saturationMin && saturationValue <= saturationMax
                     && value >= valueMin && value <= valueMax) {
                 redContours.add(contour);
@@ -184,10 +171,22 @@ public class Main {
                     && saturationValue >= saturationMin && saturationValue <= saturationMax
                     && value >= valueMin && value <= valueMax) {
                 greenContours.add(contour);
+            } else if (hueValue >= cyanHueMin && hueValue <= cyanHueMax
+                    && saturationValue >= saturationMin && saturationValue <= saturationMax
+                    && value >= valueMin && value <= valueMax) {
+                cyanContours.add(contour);
+            } else if (hueValue >= blueHueMin && hueValue <= blueHueMax
+                    && saturationValue >= saturationMin && saturationValue <= saturationMax
+                    && value >= valueMin && value <= valueMax) {
+                blueContours.add(contour);
             } else if (hueValue >= yellowHueMin && hueValue <= yellowHueMax
                     && saturationValue >= saturationMin && saturationValue <= saturationMax
                     && value >= valueMin && value <= valueMax) {
                 yellowContours.add(contour);
+            } else if (hueValue >= orangeHueMin && hueValue <= orangeHueMax
+                    && saturationValue >= saturationMin && saturationValue <= saturationMax
+                    && value >= valueMin && value <= valueMax) {
+                orangeContours.add(contour);
             }
         }
     }
