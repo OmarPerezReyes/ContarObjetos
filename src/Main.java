@@ -4,6 +4,8 @@ import org.opencv.imgproc.Imgproc;
 
 import javax.swing.*;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -61,23 +63,29 @@ public class Main {
                         Mat mask = new Mat();
                         Core.inRange(hsvImage, lowerBound, upperBound, mask);
 
-                        // Aplicar la máscara a la imagen original
-                        Mat segmented = new Mat();
-                        Core.bitwise_and(image, image, segmented, mask);
+// Encontrar los contornos en la máscara
+                        List<MatOfPoint> contours = new ArrayList<>();
+                        Mat hierarchy = new Mat();
+                        Imgproc.findContours(mask, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-                        // Mostrar la imagen segmentada en una nueva ventana
-                        MatOfByte segmentedBuffer = new MatOfByte();
-                        Imgcodecs.imencode(".jpg", segmented, segmentedBuffer);
-                        ImageIcon segmentedIcon = new ImageIcon(segmentedBuffer.toArray());
-                        JLabel segmentedLabel = new JLabel(segmentedIcon);
+// Dibujar los contornos en la imagen original (opcional, solo para visualización)
+                        Imgproc.drawContours(image, contours, -1, new Scalar(0, 255, 0), 2);
 
-                        JFrame segmentedFrame = new JFrame("Segmentación de Piezas Azules: " + file.getName());
-                        segmentedFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                        segmentedFrame.add(segmentedLabel);
-                        segmentedFrame.pack();
-                        segmentedFrame.setVisible(true);
+// Mostrar la imagen con los contornos en una nuevos ventana (opcional, solo para visualización)
+                        MatOfByte contourBuffer = new MatOfByte();
+                        Imgcodecs.imencode(".jpg", image, contourBuffer);
+                        ImageIcon contourIcon = new ImageIcon(contourBuffer.toArray());
+                        JLabel contourLabel = new JLabel(contourIcon);
 
-                        count++; // Incrementar el contador
+                        JFrame contourFrame = new JFrame("Contornos de Piezas Azules: " + file.getName());
+                        contourFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                        contourFrame.add(contourLabel);
+                        contourFrame.pack();
+                        contourFrame.setVisible(true);
+
+// Mostrar el número de piezas detectadas
+                        System.out.println("Número de piezas detectadas en " + file.getName() + ": " + contours.size());
+
                     } else {
                         System.out.println("No se pudo cargar la imagen: " + file.getName());
                     }
@@ -85,6 +93,7 @@ public class Main {
                     System.out.println("Error al cargar la imagen: " + file.getName());
                     e.printStackTrace();
                 }
+                count++;
             }
         }
     }
