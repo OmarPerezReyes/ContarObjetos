@@ -84,7 +84,8 @@ public class Main {
                         List<MatOfPoint> contours = new ArrayList<>();
                         Mat hierarchy = new Mat();
                         Imgproc.findContours(combinedMask, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-// Filtrar los contornos por área mínima y asignarlos a las listas de azules y celestes
+
+                        // Filtrar los contornos por área mínima y asignarlos a las listas de azules y celestes
                         List<MatOfPoint> blueContours = new ArrayList<>();
                         List<MatOfPoint> cyanContours = new ArrayList<>();
                         for (MatOfPoint contour : contours) {
@@ -95,13 +96,21 @@ public class Main {
                                 MatOfPoint2f approxCurve = new MatOfPoint2f();
                                 Imgproc.approxPolyDP(contour2f, approxCurve, 0.02 * contourLength, true);
 
-                                // Distinguir entre azul y celeste en función del rango de tono (hue)
-                                Scalar contourHsvMean = Core.mean(hsvImage, blueMask);
+                                // Calcular el promedio de tono, saturación y brillo en la región del contorno
+                                Mat roi = new Mat(hsvImage, Imgproc.boundingRect(contour));
+                                Scalar contourHsvMean = Core.mean(roi);
                                 double hueValue = contourHsvMean.val[0];
+                                double saturationValue = contourHsvMean.val[1];
+                                double value = contourHsvMean.val[2];
 
-                                if (hueValue >= blueHueMin && hueValue <= blueHueMax) {
+                                // Distinguir entre azul y celeste en función de los valores de tono, saturación y brillo
+                                if (hueValue >= blueHueMin && hueValue <= blueHueMax
+                                        && saturationValue >= saturationMin && saturationValue <= saturationMax
+                                        && value >= valueMin && value <= valueMax) {
                                     blueContours.add(contour);
-                                } else if (hueValue >= cyanHueMin && hueValue <= cyanHueMax) {
+                                } else if (hueValue >= cyanHueMin && hueValue <= cyanHueMax
+                                        && saturationValue >= saturationMin && saturationValue <= saturationMax
+                                        && value >= valueMin && value <= valueMax) {
                                     cyanContours.add(contour);
                                 }
                             }
