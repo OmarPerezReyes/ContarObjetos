@@ -42,7 +42,7 @@ public class Main {
 
         // Recorrer los archivos y cargar las imágenes usando OpenCV
         for (File file : files) {
-            if (file.isFile() && count < 5) { // Limitar a las primeras 5 imágenes
+            if (file.isFile() && count < 10) { // Limitar a las primeras 5 imágenes
                 try {
                     // Cargar la imagen utilizando OpenCV
                     Mat image = Imgcodecs.imread(file.getAbsolutePath());
@@ -63,13 +63,24 @@ public class Main {
                         Mat mask = new Mat();
                         Core.inRange(hsvImage, lowerBound, upperBound, mask);
 
+// Definir un área mínima para filtrar contornos pequeños
+                        double minContourArea = 100; // Puedes ajustar este valor
 // Encontrar los contornos en la máscara
                         List<MatOfPoint> contours = new ArrayList<>();
                         Mat hierarchy = new Mat();
                         Imgproc.findContours(mask, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
-// Dibujar los contornos en la imagen original (opcional, solo para visualización)
-                        Imgproc.drawContours(image, contours, -1, new Scalar(0, 255, 0), 2);
+// Filtrar los contornos por área mínima
+                        List<MatOfPoint> filteredContours = new ArrayList<>();
+                        for (MatOfPoint contour : contours) {
+                            double contourArea = Imgproc.contourArea(contour);
+                            if (contourArea >= minContourArea) {
+                                filteredContours.add(contour);
+                            }
+                        }
+
+// Dibujar los contornos filtrados en la imagen original
+                        Imgproc.drawContours(image, filteredContours, -1, new Scalar(0, 255, 0), 2);
 
 // Mostrar la imagen con los contornos en una nuevos ventana (opcional, solo para visualización)
                         MatOfByte contourBuffer = new MatOfByte();
@@ -84,7 +95,7 @@ public class Main {
                         contourFrame.setVisible(true);
 
 // Mostrar el número de piezas detectadas
-                        System.out.println("Número de piezas detectadas en " + file.getName() + ": " + contours.size());
+                        System.out.println("Número de piezas detectadas en " + file.getName() + ": " + filteredContours.size());
 
                     } else {
                         System.out.println("No se pudo cargar la imagen: " + file.getName());
