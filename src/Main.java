@@ -8,18 +8,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
-    // Valores para segmentar el color azul en el espacio HSV
-    private static final double blueHueMin = 100;   // Rango mínimo de tono para el azul
-    private static final double blueHueMax = 130;   // Rango máximo de tono para el azul
-    private static final double cyanHueMin = 80;    // Rango mínimo de tono para el celeste
-    private static final double cyanHueMax = 100;   // Rango máximo de tono para el celeste
-    private static final double saturationMin = 100; // Mínima saturación (puede ajustarse)
-    private static final double saturationMax = 255; // Máxima saturación (puede ajustarse)
-    private static final double valueMin = 50;       // Valor mínimo (brillo) (puede ajustarse)
-    private static final double valueMax = 255;      // Valor máximo (brillo) (puede ajustarse)
+    // Valores para segmentar los colores en el espacio HSV
+    private static final double blueHueMin = 100;
+    private static final double blueHueMax = 130;
+    private static final double cyanHueMin = 80;
+    private static final double cyanHueMax = 100;
+    private static final double orangeHueMin = 5;
+    private static final double orangeHueMax = 25;
+    private static final double redHueMin = 160;
+    private static final double redHueMax = 180;
+    private static final double greenHueMin = 35;
+    private static final double greenHueMax = 60;
+    private static final double yellowHueMin = 25;
+    private static final double yellowHueMax = 35;
+    private static final double saturationMin = 100;
+    private static final double saturationMax = 255;
+    private static final double valueMin = 50;
+    private static final double valueMax = 255;
 
     public static void main(String[] args) {
-
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         String folderPath = "C:\\Users\\perez\\IdeaProjects\\ContarObjetos\\assets\\photos";
@@ -58,16 +65,22 @@ public class Main {
                 List<MatOfPoint> contours = findContours(combinedMask);
                 List<MatOfPoint> blueContours = new ArrayList<>();
                 List<MatOfPoint> cyanContours = new ArrayList<>();
+                List<MatOfPoint> orangeContours = new ArrayList<>();
+                List<MatOfPoint> redContours = new ArrayList<>();
+                List<MatOfPoint> greenContours = new ArrayList<>();
+                List<MatOfPoint> yellowContours = new ArrayList<>();
 
                 for (MatOfPoint contour : contours) {
                     double contourArea = Imgproc.contourArea(contour);
 
                     if (contourArea >= 100) {
-                        classifyContours(contour, blueContours, cyanContours, hsvImage);
+                        classifyContours(contour, blueContours, cyanContours, orangeContours, redContours,
+                                greenContours, yellowContours, hsvImage);
                     }
                 }
 
-                drawContoursAndText(image, blueContours, cyanContours, file.getName());
+                drawContoursAndText(image, blueContours, cyanContours, orangeContours, redContours,
+                        greenContours, yellowContours, file.getName());
             } else {
                 System.out.println("No se pudo cargar la imagen: " + file.getName());
             }
@@ -82,6 +95,16 @@ public class Main {
         Scalar blueUpperBound = new Scalar(130, 255, 255);
         Scalar cyanLowerBound = new Scalar(80, 100, 50);
         Scalar cyanUpperBound = new Scalar(100, 255, 255);
+        Scalar orangeLowerBound = new Scalar(5, 100, 50);
+        Scalar orangeUpperBound = new Scalar(25, 255, 255);
+        Scalar redLowerBound1 = new Scalar(0, 100, 50);
+        Scalar redUpperBound1 = new Scalar(10, 255, 255);
+        Scalar redLowerBound2 = new Scalar(160, 100, 50);
+        Scalar redUpperBound2 = new Scalar(180, 255, 255);
+        Scalar greenLowerBound = new Scalar(35, 100, 50);
+        Scalar greenUpperBound = new Scalar(60, 255, 255);
+        Scalar yellowLowerBound = new Scalar(25, 100, 50);
+        Scalar yellowUpperBound = new Scalar(35, 255, 255);
 
         Mat blueMask = new Mat();
         Core.inRange(hsvImage, blueLowerBound, blueUpperBound, blueMask);
@@ -89,8 +112,28 @@ public class Main {
         Mat cyanMask = new Mat();
         Core.inRange(hsvImage, cyanLowerBound, cyanUpperBound, cyanMask);
 
+        Mat orangeMask = new Mat();
+        Core.inRange(hsvImage, orangeLowerBound, orangeUpperBound, orangeMask);
+
+        Mat redMask1 = new Mat();
+        Core.inRange(hsvImage, redLowerBound1, redUpperBound1, redMask1);
+        Mat redMask2 = new Mat();
+        Core.inRange(hsvImage, redLowerBound2, redUpperBound2, redMask2);
+        Mat redMask = new Mat();
+        Core.add(redMask1, redMask2, redMask);
+
+        Mat greenMask = new Mat();
+        Core.inRange(hsvImage, greenLowerBound, greenUpperBound, greenMask);
+
+        Mat yellowMask = new Mat();
+        Core.inRange(hsvImage, yellowLowerBound, yellowUpperBound, yellowMask);
+
         Mat combinedMask = new Mat();
         Core.add(blueMask, cyanMask, combinedMask);
+        Core.add(combinedMask, orangeMask, combinedMask);
+        Core.add(combinedMask, redMask, combinedMask);
+        Core.add(combinedMask, greenMask, combinedMask);
+        Core.add(combinedMask, yellowMask, combinedMask);
 
         return combinedMask;
     }
@@ -102,7 +145,10 @@ public class Main {
         return contours;
     }
 
-    private static void classifyContours(MatOfPoint contour, List<MatOfPoint> blueContours, List<MatOfPoint> cyanContours, Mat hsvImage) {
+    private static void classifyContours(MatOfPoint contour, List<MatOfPoint> blueContours, List<MatOfPoint> cyanContours,
+                                         List<MatOfPoint> orangeContours, List<MatOfPoint> redContours,
+                                         List<MatOfPoint> greenContours, List<MatOfPoint> yellowContours,
+                                         Mat hsvImage) {
         double contourArea = Imgproc.contourArea(contour);
 
         if (contourArea >= 100) {
@@ -125,29 +171,61 @@ public class Main {
                     && saturationValue >= saturationMin && saturationValue <= saturationMax
                     && value >= valueMin && value <= valueMax) {
                 cyanContours.add(contour);
+            } else if (hueValue >= orangeHueMin && hueValue <= orangeHueMax
+                    && saturationValue >= saturationMin && saturationValue <= saturationMax
+                    && value >= valueMin && value <= valueMax) {
+                orangeContours.add(contour);
+            } else if ((hueValue >= redHueMin && hueValue <= 180
+                    || hueValue >= 0 && hueValue <= redHueMax)
+                    && saturationValue >= saturationMin && saturationValue <= saturationMax
+                    && value >= valueMin && value <= valueMax) {
+                redContours.add(contour);
+            } else if (hueValue >= greenHueMin && hueValue <= greenHueMax
+                    && saturationValue >= saturationMin && saturationValue <= saturationMax
+                    && value >= valueMin && value <= valueMax) {
+                greenContours.add(contour);
+            } else if (hueValue >= yellowHueMin && hueValue <= yellowHueMax
+                    && saturationValue >= saturationMin && saturationValue <= saturationMax
+                    && value >= valueMin && value <= valueMax) {
+                yellowContours.add(contour);
             }
         }
     }
 
-    private static void drawContoursAndText(Mat image, List<MatOfPoint> blueContours, List<MatOfPoint> cyanContours, String fileName) {
-        Imgproc.drawContours(image, blueContours, -1, new Scalar(0, 0, 255), 2); // Draw in red for blues
-        Imgproc.drawContours(image, cyanContours, -1, new Scalar(255, 0, 0), 2); // Draw in blue for cyans
+    private static void drawContoursAndText(Mat image, List<MatOfPoint> blueContours, List<MatOfPoint> cyanContours,
+                                            List<MatOfPoint> orangeContours, List<MatOfPoint> redContours,
+                                            List<MatOfPoint> greenContours, List<MatOfPoint> yellowContours,
+                                            String fileName) {
+        Imgproc.drawContours(image, blueContours, -1, new Scalar(255, 0, 0), 2);  // Azul
+        Imgproc.drawContours(image, cyanContours, -1, new Scalar(255, 255, 0), 2); // Cyan
+        Imgproc.drawContours(image, orangeContours, -1, new Scalar(0, 165, 255), 2); // Naranja
+        Imgproc.drawContours(image, redContours, -1, new Scalar(0, 0, 255), 2);   // Rojo
+        Imgproc.drawContours(image, greenContours, -1, new Scalar(0, 255, 0), 2);   // Verde
+        Imgproc.drawContours(image, yellowContours, -1, new Scalar(0 , 255, 255), 2); // Amarillo
 
         String blueText = "Azules: " + blueContours.size();
         String cyanText = "Celestes: " + cyanContours.size();
-        Imgproc.putText(image, blueText, new Point(10, 30), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0, 255), 2);
-        Imgproc.putText(image, cyanText, new Point(10, 60), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+        String orangeText = "Naranjas: " + orangeContours.size();
+        String redText = "Rojos: " + redContours.size();
+        String greenText = "Verdes: " + greenContours.size();
+        String yellowText = "Amarillos: " + yellowContours.size();
+
+        Imgproc.putText(image, blueText, new Point(10, 30), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 0, 0), 2);
+        Imgproc.putText(image, cyanText, new Point(10, 60), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(255, 255, 0), 2);
+        Imgproc.putText(image, orangeText, new Point(10, 90), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 165, 255), 2);
+        Imgproc.putText(image, redText, new Point(10, 120), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0, 255), 2);
+        Imgproc.putText(image, greenText, new Point(10, 150), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 255, 0), 2);
+        Imgproc.putText(image, yellowText, new Point(10, 180), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 255, 255), 2);
 
         MatOfByte contourBuffer = new MatOfByte();
         Imgcodecs.imencode(".jpg", image, contourBuffer);
         ImageIcon contourIcon = new ImageIcon(contourBuffer.toArray());
         JLabel contourLabel = new JLabel(contourIcon);
 
-        JFrame contourFrame = new JFrame("Contornos de Piezas Azules y Celestes: " + fileName);
+        JFrame contourFrame = new JFrame("Contornos de Bloques de Construcción: " + fileName);
         contourFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         contourFrame.add(contourLabel);
         contourFrame.pack();
         contourFrame.setVisible(true);
     }
-
 }
