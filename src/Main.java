@@ -27,13 +27,12 @@ public class Main {
     private static final double valueMax = 255;
 
     public static void main(String[] args) {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
-        String folderPath = "C:\\Users\\perez\\IdeaProjects\\ContarObjetos\\assets\\photos";
-        processImages(folderPath);
     }
 
-    private static void processImages(String folderPath) {
+    static void processImages(String folderPath) {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+
         File folder = new File(folderPath);
 
         if (!folder.exists() || !folder.isDirectory()) {

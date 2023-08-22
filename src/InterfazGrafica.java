@@ -13,7 +13,7 @@ public class InterfazGrafica {
             JPanel panel = new JPanel();
             panel.setLayout(new GridLayout(3, 1, 10, 10)); // Diseño en forma de cuadrícula
 
-            JButton preselectedButton = new JButton("Imagen preseleccionada");
+            JButton preselectedButton = new JButton("Imagenes preseleccionadas");
             JButton selectImageButton = new JButton("Seleccionar imagen");
             JButton openCameraButton = new JButton("Abrir cámara");
 
@@ -24,11 +24,15 @@ public class InterfazGrafica {
             preselectedButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    // Acción cuando se presiona el botón "Imagen preseleccionada"
-                    JOptionPane.showMessageDialog(frame, "Imagen preseleccionada elegida");
-                }
-            });
+                    // Crea una instancia de Main
+                    Main main = new Main();
 
+                    // Crea o carga una instancia 'preselectedImage' de tipo Mat que contiene la imagen preseleccionada
+
+                    main.processImages("C:\\Users\\perez\\IdeaProjects\\ContarObjetos\\assets\\photos");
+
+                    }
+            });
             selectImageButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
