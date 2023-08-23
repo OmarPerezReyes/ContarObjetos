@@ -46,7 +46,7 @@ public class Main {
         int count = 0;
 
         for (File file : files) {
-            if (file.isFile() && count < 1) { //files.length
+            if (file.isFile() && count < 5) { //files.length
                 processSingleImage(file);
                 count++;
             }
