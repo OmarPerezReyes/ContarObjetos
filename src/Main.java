@@ -28,10 +28,12 @@ public class Main {
 
     public static void main(String[] args) {
 
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        String folderPath = "C:\\Users\\perez\\IdeaProjects\\ContarObjetos\\assets\\photos";
+        processImages(folderPath);
     }
 
     static void processImages(String folderPath) {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         File folder = new File(folderPath);
 
@@ -44,7 +46,7 @@ public class Main {
         int count = 0;
 
         for (File file : files) {
-            if (file.isFile() && count < 5) {
+            if (file.isFile() && count < 1) { //files.length
                 processSingleImage(file);
                 count++;
             }
@@ -199,10 +201,16 @@ public class Main {
             double saturationValue = contourHsvMean.val[1];
             double value = contourHsvMean.val[2];
 
-            if ((hueValue >= redHueMin && hueValue <= redHueMax)
-                    && saturationValue >= saturationMin && saturationValue <= saturationMax
-                    && value >= valueMin && value <= valueMax) {
-                redContours.add(contour);
+            if ((hueValue >= redHueMin && hueValue <= redHueMax) &&
+                    saturationValue >= saturationMin && saturationValue <= saturationMax &&
+                    value >= valueMin && value <= valueMax) {
+
+                // Separate detection for the two ranges of red hue
+                if (hueValue >= redHueMin && hueValue <= redHueMax) {
+                    redContours.add(contour);
+                } else if (hueValue >= 0 && hueValue <= 10) {
+                    redContours.add(contour);
+                }
             } else if (hueValue >= greenHueMin && hueValue <= greenHueMax
                     && saturationValue >= saturationMin && saturationValue <= saturationMax
                     && value >= valueMin && value <= valueMax) {
@@ -226,6 +234,7 @@ public class Main {
             }
         }
     }
+
 
     private static void drawContoursAndText(Mat image, List<MatOfPoint> blueContours, List<MatOfPoint> cyanContours,
                                             List<MatOfPoint> orangeContours, List<MatOfPoint> redContours,
