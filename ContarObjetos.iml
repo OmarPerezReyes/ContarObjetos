@@ -7,20 +7,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://D:/java/opencv-470.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <NATIVE>
-          <root url="file://D:/java/x64" />
-        </NATIVE>
-        <SOURCES>
-          <root url="jar://D:/java/opencv-470.jar!/" />
-          <root url="jar://D:/java/opencv-470.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
+    <orderEntry type="library" name="opencv-470" level="project" />
   </component>
 </module>

@@ -1,0 +1,17 @@
+<component name="libraryTable">
+  <library name="opencv-470">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Downloads/OPENcv/build/java/opencv-470.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <NATIVE>
+      <root url="file://$USER_HOME$/Downloads/OPENcv/build/java/x64" />
+    </NATIVE>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/Downloads/OPENcv/build/java/opencv-470.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/OPENcv/build/java/opencv-470.jar!/" />
+      <root url="file://$USER_HOME$/Downloads/OPENcv/build/java" />
+    </SOURCES>
+    <jarDirectory url="file://$USER_HOME$/Downloads/OPENcv/build/java" recursive="false" type="SOURCES" />
+  </library>
+</component>

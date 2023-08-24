@@ -31,7 +31,7 @@ public class Main {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         // Ruta de la carpeta que contiene las imágenes
-        String folderPath = "C:\\Users\\perez\\IdeaProjects\\ContarObjetos\\assets\\photos";
+        String folderPath = "C:\\Users\\FDZja\\OneDrive\\Documentos\\ContarObjetos\\assets\\photos"; //Videos recortados en otra carpeta y fotos cpn el numero q seguia
 
         // Procesa las imágenes en la carpeta
         processImages(folderPath);
