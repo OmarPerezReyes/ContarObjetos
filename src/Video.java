@@ -56,7 +56,7 @@ public class Video {
         contourFrame.setLocationRelativeTo(null);  // Centra la ventana en la pantalla
         contourFrame.setVisible(true);
         //----------------------------------------
-        int frameSkip = 5;  // Procesar cada 5to cuadro
+        int frameSkip = 4;  // Procesar cada 5to cuadro
 
         // Procesa los cuadros del video
         while (videoCapture.read(frame) && frameCount < maxFrames) {
@@ -123,20 +123,21 @@ public class Video {
     // Método para crear la máscara combinada utilizando umbrales de color
     private static Mat createCombinedMask(Mat hsvImage) {
         // Definición de umbrales de color para diferentes colores
-        Scalar blueLowerBound = new Scalar(100, 100, 50);
-        Scalar blueUpperBound = new Scalar(130, 255, 255);
-        Scalar cyanLowerBound = new Scalar(80, 100, 50); // Ajusta el límite inferior para el tono celeste
-        Scalar cyanUpperBound = new Scalar(100, 255, 255); // Ajusta el límite superior para el tono celeste
-        Scalar orangeLowerBound = new Scalar(5, 100, 50);
-        Scalar orangeUpperBound = new Scalar(25, 255, 255);
-        Scalar redLowerBound1 = new Scalar(160, 100, 50); // Ajusta el límite inferior para el tono rojo
-        Scalar redUpperBound1 = new Scalar(180, 255, 255); // Ajusta el límite superior para el tono rojo
-        Scalar redLowerBound2 = new Scalar(0, 100, 50); // Ajusta el límite inferior para el tono rojo
-        Scalar redUpperBound2 = new Scalar(10, 255, 255); // Ajusta el límite superior para el tono rojo
-        Scalar greenLowerBound = new Scalar(35, 100, 50);
-        Scalar greenUpperBound = new Scalar(60, 255, 255);
-        Scalar yellowLowerBound = new Scalar(25, 100, 50);
-        Scalar yellowUpperBound = new Scalar(35, 255, 255);
+        final Scalar blueLowerBound = new Scalar(100, 100, 50);
+        final Scalar blueUpperBound = new Scalar(120, 255, 255);
+        final Scalar cyanLowerBound = new Scalar(80, 100, 50);
+        final Scalar cyanUpperBound = new Scalar(100, 255, 255);
+        final Scalar orangeLowerBound = new Scalar(11, 125, 100);
+        final Scalar orangeUpperBound = new Scalar(23, 255, 255);
+        final Scalar redLowerBound1 = new Scalar(0, 100, 50);
+        final Scalar redUpperBound1 = new Scalar(11, 255, 255);
+        final Scalar redLowerBound2 = new Scalar(120, 100, 50);
+        final Scalar redUpperBound2 = new Scalar(190, 255, 255);
+        final Scalar greenUpperBound = new Scalar(60, 255, 255);
+        final Scalar greenLowerBound = new Scalar(35, 100, 50);
+        final Scalar yellowLowerBound = new Scalar(23, 100, 50);
+        final Scalar yellowUpperBound = new Scalar(35, 255, 255);
+
         // Creación de máscaras individuales para cada color
         Mat blueMask = new Mat();
         Core.inRange(hsvImage, blueLowerBound, blueUpperBound, blueMask);

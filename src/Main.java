@@ -52,7 +52,7 @@ public class Main {
 
         // Itera sobre los archivos y procesa las primeras 5 imágenes (puedes ajustar esto)
         for (File file : files) {
-            if (file.isFile() && count < 12) { //files.length
+            if (file.isFile() && count < 10) { //files.length
                 processSingleImage(file);
                 count++;
             }
