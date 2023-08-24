@@ -9,17 +9,17 @@ import java.util.List;
 
 public class Video {
     // Definición de umbrales de color para segmentación en el espacio HSV
-    private static final double blueHueMin = 100;
+    private static final double blueHueMin = 105;
     private static final double blueHueMax = 130;
-    private static final double cyanHueMin = 80;
-    private static final double cyanHueMax = 100;
+    private static final double cyanHueMin = 95;
+    private static final double cyanHueMax = 105;
     private static final double orangeHueMin = 5;
-    private static final double orangeHueMax = 25;
+    private static final double orangeHueMax = 23.5;
     private static final double redHueMin = 160;
     private static final double redHueMax = 180;
     private static final double greenHueMin = 35;
     private static final double greenHueMax = 60;
-    private static final double yellowHueMin = 25;
+    private static final double yellowHueMin = 23.5;
     private static final double yellowHueMax = 35;
     private static final double saturationMin = 100;
     private static final double saturationMax = 255;
@@ -31,8 +31,7 @@ public class Video {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         // Ruta de la carpeta que contiene el video
-        //String videoPath = "C:\\Users\\FDZja\\OneDrive\\Documentos\\ContarObjetos - copia\\assets\\video\\Video_1.mp4"; // detalles entre azul y celeste
-        String videoPath = "C:\\Users\\FDZja\\OneDrive\\Documentos\\ContarObjetos - copia\\assets\\video\\Video_2.mp4"; // detalles entre amarillo y naranja, si detecta rojo
+        String videoPath = "assets\\video\\Video_2.mp4"; // detalles entre amarillo y naranja, si detecta rojo
 
         // Captura el video
         VideoCapture videoCapture = new VideoCapture(videoPath);
@@ -57,14 +56,16 @@ public class Video {
         contourFrame.setLocationRelativeTo(null);  // Centra la ventana en la pantalla
         contourFrame.setVisible(true);
         //----------------------------------------
+        int frameSkip = 5;  // Procesar cada 5to cuadro
 
         // Procesa los cuadros del video
         while (videoCapture.read(frame) && frameCount < maxFrames) {
-            processSingleFrame(frame);
+            if (frameCount % frameSkip == 0) {  // Saltar cuadros intermedios
+                processSingleFrame(frame);
 
-            // Actualiza la ventana con el cuadro procesado
-            updateContourLabel(contourLabel, frame);
-
+                // Actualiza la ventana con el cuadro procesado
+                updateContourLabel(contourLabel, frame);
+            }
             frameCount++;
         }
 
@@ -124,19 +125,18 @@ public class Video {
         // Definición de umbrales de color para diferentes colores
         Scalar blueLowerBound = new Scalar(100, 100, 50);
         Scalar blueUpperBound = new Scalar(130, 255, 255);
-        Scalar cyanLowerBound = new Scalar(80, 100, 50);
-        Scalar cyanUpperBound = new Scalar(100, 255, 255);
+        Scalar cyanLowerBound = new Scalar(80, 100, 50); // Ajusta el límite inferior para el tono celeste
+        Scalar cyanUpperBound = new Scalar(100, 255, 255); // Ajusta el límite superior para el tono celeste
         Scalar orangeLowerBound = new Scalar(5, 100, 50);
         Scalar orangeUpperBound = new Scalar(25, 255, 255);
-        Scalar redLowerBound1 = new Scalar(0, 100, 50);
-        Scalar redUpperBound1 = new Scalar(10, 255, 255);
-        Scalar redLowerBound2 = new Scalar(160, 100, 50);
-        Scalar redUpperBound2 = new Scalar(180, 255, 255);
+        Scalar redLowerBound1 = new Scalar(160, 100, 50); // Ajusta el límite inferior para el tono rojo
+        Scalar redUpperBound1 = new Scalar(180, 255, 255); // Ajusta el límite superior para el tono rojo
+        Scalar redLowerBound2 = new Scalar(0, 100, 50); // Ajusta el límite inferior para el tono rojo
+        Scalar redUpperBound2 = new Scalar(10, 255, 255); // Ajusta el límite superior para el tono rojo
         Scalar greenLowerBound = new Scalar(35, 100, 50);
         Scalar greenUpperBound = new Scalar(60, 255, 255);
         Scalar yellowLowerBound = new Scalar(25, 100, 50);
         Scalar yellowUpperBound = new Scalar(35, 255, 255);
-
         // Creación de máscaras individuales para cada color
         Mat blueMask = new Mat();
         Core.inRange(hsvImage, blueLowerBound, blueUpperBound, blueMask);

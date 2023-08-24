@@ -9,29 +9,27 @@ import java.util.List;
 
 public class Main {
     // Definición de umbrales de color para segmentación en el espacio HSV
-    private static final double blueHueMin = 100;
-    private static final double blueHueMax = 130;
-    private static final double cyanHueMin = 80;
-    private static final double cyanHueMax = 100;
-    private static final double orangeHueMin = 5;
-    private static final double orangeHueMax = 25;
-    private static final double redHueMin = 160;
-    private static final double redHueMax = 180;
-    private static final double greenHueMin = 35;
-    private static final double greenHueMax = 60;
-    private static final double yellowHueMin = 25;
-    private static final double yellowHueMax = 35;
-    private static final double saturationMin = 100;
-    private static final double saturationMax = 255;
-    private static final double valueMin = 50;
-    private static final double valueMax = 255;
+    private static final Scalar blueLowerBound = new Scalar(100, 100, 50);
+    private static final Scalar blueUpperBound = new Scalar(120, 255, 255);
+    private static final Scalar cyanLowerBound = new Scalar(80, 100, 50);
+    private static final Scalar cyanUpperBound = new Scalar(100, 255, 255);
+    private static final Scalar orangeLowerBound = new Scalar(11, 125, 100);
+    private static final Scalar orangeUpperBound = new Scalar(23, 255, 255);
+    private static final Scalar redLowerBound1 = new Scalar(0, 100, 50);
+    private static final Scalar redUpperBound1 = new Scalar(11, 255, 255);
+    private static final Scalar redLowerBound2 = new Scalar(120, 100, 50);
+    private static final Scalar redUpperBound2 = new Scalar(190, 255, 255);
+    private static final Scalar greenLowerBound = new Scalar(35, 100, 50);
+    private static final Scalar greenUpperBound = new Scalar(60, 255, 255);
+    private static final Scalar yellowLowerBound = new Scalar(23, 100, 50);
+    private static final Scalar yellowUpperBound = new Scalar(35, 255, 255);
 
     public static void main(String[] args) {
         // Carga la biblioteca OpenCV
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         // Ruta de la carpeta que contiene las imágenes
-        String folderPath = "C:\\Users\\FDZja\\OneDrive\\Documentos\\ContarObjetos\\assets\\photos"; //Videos recortados en otra carpeta y fotos cpn el numero q seguia
+        String folderPath = "assets\\photos"; //Videos recortados en otra carpeta y fotos cpn el numero q seguia
 
         // Procesa las imágenes en la carpeta
         processImages(folderPath);
@@ -54,7 +52,7 @@ public class Main {
 
         // Itera sobre los archivos y procesa las primeras 5 imágenes (puedes ajustar esto)
         for (File file : files) {
-            if (file.isFile() && count < 5) { //files.length
+            if (file.isFile() && count < 12) { //files.length
                 processSingleImage(file);
                 count++;
             }
@@ -113,22 +111,6 @@ public class Main {
 
     // Método para crear la máscara combinada utilizando umbrales de color
     private static Mat createCombinedMask(Mat hsvImage) {
-        // Definición de umbrales de color para diferentes colores
-        Scalar blueLowerBound = new Scalar(100, 100, 50);
-        Scalar blueUpperBound = new Scalar(130, 255, 255);
-        Scalar cyanLowerBound = new Scalar(80, 100, 50);
-        Scalar cyanUpperBound = new Scalar(100, 255, 255);
-        Scalar orangeLowerBound = new Scalar(5, 100, 50);
-        Scalar orangeUpperBound = new Scalar(25, 255, 255);
-        Scalar redLowerBound1 = new Scalar(0, 100, 50);
-        Scalar redUpperBound1 = new Scalar(10, 255, 255);
-        Scalar redLowerBound2 = new Scalar(160, 100, 50);
-        Scalar redUpperBound2 = new Scalar(180, 255, 255);
-        Scalar greenLowerBound = new Scalar(35, 100, 50);
-        Scalar greenUpperBound = new Scalar(60, 255, 255);
-        Scalar yellowLowerBound = new Scalar(25, 100, 50);
-        Scalar yellowUpperBound = new Scalar(35, 255, 255);
-
         // Creación de máscaras individuales para cada color
         Mat blueMask = new Mat();
         Core.inRange(hsvImage, blueLowerBound, blueUpperBound, blueMask);
@@ -193,39 +175,37 @@ public class Main {
             double saturationValue = contourHsvMean.val[1];
             double value = contourHsvMean.val[2];
 
-            if ((hueValue >= redHueMin && hueValue <= redHueMax) &&
-                    saturationValue >= saturationMin && saturationValue <= saturationMax &&
-                    value >= valueMin && value <= valueMax) {
-
-                // Separate detection for the two ranges of red hue
-                if (hueValue >= redHueMin && hueValue <= redHueMax) {
+            if (isColorInRange(hueValue, saturationValue, value)) {
+                if (isColorInRange(hueValue, saturationValue, redLowerBound1, redUpperBound1) ||
+                        isColorInRange(hueValue, saturationValue, redLowerBound2, redUpperBound2)) {
                     redContours.add(contour);
-                } else if (hueValue >= 0 && hueValue <= 10) {
-                    redContours.add(contour);
-                }         // (Clasificación para otros colores)
-            } else if (hueValue >= greenHueMin && hueValue <= greenHueMax
-                    && saturationValue >= saturationMin && saturationValue <= saturationMax
-                    && value >= valueMin && value <= valueMax) {
-                greenContours.add(contour);
-            } else if (hueValue >= cyanHueMin && hueValue <= cyanHueMax
-                    && saturationValue >= saturationMin && saturationValue <= saturationMax
-                    && value >= valueMin && value <= valueMax) {
-                cyanContours.add(contour);
-            } else if (hueValue >= blueHueMin && hueValue <= blueHueMax
-                    && saturationValue >= saturationMin && saturationValue <= saturationMax
-                    && value >= valueMin && value <= valueMax) {
-                blueContours.add(contour);
-            } else if (hueValue >= yellowHueMin && hueValue <= yellowHueMax
-                    && saturationValue >= saturationMin && saturationValue <= saturationMax
-                    && value >= valueMin && value <= valueMax) {
-                yellowContours.add(contour);
-            } else if (hueValue >= orangeHueMin && hueValue <= orangeHueMax
-                    && saturationValue >= saturationMin && saturationValue <= saturationMax
-                    && value >= valueMin && value <= valueMax) {
-                orangeContours.add(contour);
+                } else if (isColorInRange(hueValue, saturationValue, greenLowerBound, greenUpperBound)) {
+                    greenContours.add(contour);
+                } else if (isColorInRange(hueValue, saturationValue, cyanLowerBound, cyanUpperBound)) {
+                    cyanContours.add(contour);
+                } else if (isColorInRange(hueValue, saturationValue, blueLowerBound, blueUpperBound)) {
+                    blueContours.add(contour);
+                } else if (isColorInRange(hueValue, saturationValue, yellowLowerBound, yellowUpperBound)) {
+                    yellowContours.add(contour);
+                } else if (isColorInRange(hueValue, saturationValue, orangeLowerBound, orangeUpperBound)) {
+                    orangeContours.add(contour);
+                }
             }
+
+
         }
     }
+    private static boolean isColorInRange(double hueValue, double saturationValue, double value) {
+        return hueValue >= 0 && hueValue <= 180 &&
+                saturationValue >= 0 && saturationValue <= 255 &&
+                value >= 0 && value <= 255;
+    }
+
+    private static boolean isColorInRange(double hueValue, double saturationValue, Scalar lowerBound, Scalar upperBound) {
+        return hueValue >= lowerBound.val[0] && hueValue <= upperBound.val[0] &&
+                saturationValue >= lowerBound.val[1] && saturationValue <= upperBound.val[1];
+    }
+
 
 
     // Método para dibujar contornos y mostrar información en una ventana emergente
