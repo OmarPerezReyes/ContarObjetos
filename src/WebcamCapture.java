@@ -1,93 +1,75 @@
 import org.opencv.core.*;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
-import org.opencv.videoio.Videoio;
-import org.opencv.highgui.HighGui;
+import org.opencv.videoio.VideoWriter;
 
+import javax.swing.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class WebcamCapture {
-
+public class WebcamCapture extends Video{
+    // Definición de umbrales de color para segmentación en el espacio HSV
+    private static final double blueHueMin = 105;
+    private static final double blueHueMax = 130;
+    private static final double cyanHueMin = 95;
+    private static final double cyanHueMax = 105;
+    private static final double orangeHueMin = 5;
+    private static final double orangeHueMax = 23.5;
+    private static final double redHueMin = 160;
+    private static final double redHueMax = 180;
+    private static final double greenHueMin = 35;
+    private static final double greenHueMax = 60;
+    private static final double yellowHueMin = 23.5;
+    private static final double yellowHueMax = 35;
+    private static final double saturationMin = 100;
+    private static final double saturationMax = 255;
+    private static final double valueMin = 50;
+    private static final double valueMax = 255;
     public static void main(String[] args) {
+        // Carga la biblioteca OpenCV
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
-        VideoCapture camera = new VideoCapture(0); // 0 representa la cámara web predeterminada
+        // Inicializa la captura de la cámara web
+        VideoCapture videoCapture = new VideoCapture(0); // El argumento 0 indica el índice de la cámara
 
-        if (!camera.isOpened()) {
-            System.out.println("No se pudo conectar a la cámara.");
+        // Verifica si la cámara web se ha abierto correctamente
+        if (!videoCapture.isOpened()) {
+            System.out.println("No se pudo abrir la cámara web.");
             return;
         }
 
         Mat frame = new Mat();
+        int frameCount = 0;
+        int maxFrames = 2000;  // Número máximo de cuadros a procesar (ajusta según necesario)
+        int frameSkip = 4;  // Procesar cada 5to cuadro
 
-        while (true) {
-            if (camera.read(frame)) {
-                Mat hsvFrame = new Mat();
-                Imgproc.cvtColor(frame, hsvFrame, Imgproc.COLOR_BGR2HSV);
+        //----------------------------------------
+        // Crear la ventana para mostrar los resultados
+        JFrame contourFrame = new JFrame("Contornos de Bloques de Construcción");
+        contourFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        JLabel contourLabel = new JLabel();
+        contourFrame.add(contourLabel);
+        contourFrame.setSize(650, 520);  // Ajusta el tamaño de la ventana emergente
+        contourFrame.setLocationRelativeTo(null);  // Centra la ventana en la pantalla
+        contourFrame.setVisible(true);
+        //----------------------------------------
 
-                // Definir rangos de colores para cada pieza
-                Scalar lowerRed = new Scalar(0, 100, 100);
-                Scalar upperRed = new Scalar(10, 255, 255);
+        // Procesa los cuadros de la cámara web
+        while (frameCount < maxFrames) {
+            videoCapture.read(frame);
 
-                Scalar lowerOrange = new Scalar(11, 100, 100);
-                Scalar upperOrange = new Scalar(25, 255, 255);
+            if (frameCount % frameSkip == 0) {  // Saltar cuadros intermedios
+                processSingleFrame(frame);
 
-                Scalar lowerYellow = new Scalar(26, 100, 100);
-                Scalar upperYellow = new Scalar(35, 255, 255);
-
-                Scalar lowerBlue = new Scalar(100, 100, 100);
-                Scalar upperBlue = new Scalar(130, 255, 255);
-
-                Scalar lowerCyan = new Scalar(80, 100, 100);
-                Scalar upperCyan = new Scalar(100, 255, 255);
-
-                // Crear máscaras para cada rango de color
-                Mat redMask = new Mat();
-                Mat orangeMask = new Mat();
-                Mat yellowMask = new Mat();
-                Mat blueMask = new Mat();
-                Mat cyanMask = new Mat();
-
-                Core.inRange(hsvFrame, lowerRed, upperRed, redMask);
-                Core.inRange(hsvFrame, lowerOrange, upperOrange, orangeMask);
-                Core.inRange(hsvFrame, lowerYellow, upperYellow, yellowMask);
-                Core.inRange(hsvFrame, lowerBlue, upperBlue, blueMask);
-                Core.inRange(hsvFrame, lowerCyan, upperCyan, cyanMask);
-
-                // Combinar todas las máscaras para obtener una máscara general
-                Mat combinedMask = new Mat();
-                Core.add(redMask, orangeMask, combinedMask);
-                Core.add(combinedMask, yellowMask, combinedMask);
-                Core.add(combinedMask, blueMask, combinedMask);
-                Core.add(combinedMask, cyanMask, combinedMask);
-
-                Mat contoursFrame = frame.clone();
-                List<MatOfPoint> contours = new ArrayList<>();
-                Mat hierarchy = new Mat();
-                Imgproc.findContours(combinedMask, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-
-                int totalColoredObjects = 0;
-
-                for (MatOfPoint contour : contours) {
-                    Imgproc.drawContours(contoursFrame, Arrays.asList(contour), -1, new Scalar(0, 0, 255), 2);
-                    totalColoredObjects++;
-                }
-
-                // Mostrar el número de objetos de colores detectados
-                String text = "Total de Objetos Coloreados: " + totalColoredObjects;
-                Imgproc.putText(contoursFrame, text, new Point(10, 30), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0, 255), 2);
-
-                // Mostrar el marco con las detecciones y el recuento
-                HighGui.imshow("Detección y Recuento de Objetos Coloreados", contoursFrame);
-                if (HighGui.waitKey(10) == 27) {
-                    break; // Presionar Esc para salir del bucle
-                }
+                // Actualiza la ventana con el cuadro procesado
+                updateContourLabel(contourLabel, frame);
             }
+            frameCount++;
         }
 
-        camera.release();
-        HighGui.destroyAllWindows();
+        // Libera recursos
+        videoCapture.release();
     }
+
 }

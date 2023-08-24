@@ -56,7 +56,7 @@ public class Video {
         contourFrame.setLocationRelativeTo(null);  // Centra la ventana en la pantalla
         contourFrame.setVisible(true);
         //----------------------------------------
-        int frameSkip = 4;  // Procesar cada 5to cuadro
+        int frameSkip = 3;  // Procesar cada 5to cuadro
 
         // Procesa los cuadros del video
         while (videoCapture.read(frame) && frameCount < maxFrames) {
@@ -74,7 +74,7 @@ public class Video {
     }
 
     // Método para procesar un cuadro del video
-    private static void processSingleFrame(Mat frame) {
+    static void processSingleFrame(Mat frame) {
         try {
             // Verifica si el cuadro se cargó correctamente
             if (!frame.empty()){
@@ -268,7 +268,7 @@ public class Video {
     }
 
     // Método para actualizar la etiqueta con el cuadro procesado en la ventana
-    private static void updateContourLabel(JLabel contourLabel, Mat image) {
+    static void updateContourLabel(JLabel contourLabel, Mat image) {
         MatOfByte buffer = new MatOfByte();
         Imgcodecs.imencode(".jpg", image, buffer);
         ImageIcon icon = new ImageIcon(buffer.toArray());
